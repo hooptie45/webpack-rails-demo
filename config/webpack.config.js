@@ -1,70 +1,85 @@
-// Example webpack configuration with asset fingerprinting in production.
-'use strict';
+require('coffee-script/register')
 
-var path = require('path');
-var webpack = require('webpack');
-var StatsPlugin = require('stats-webpack-plugin');
+var StatsPlugin = require('stats-webpack-plugin'),
+    merge       = require('webpack-merge'),
+    path        = require('path'),
+    webpack     = require('webpack')
 
-// must match config.webpack.dev_server.port
-var devServerPort = 3808;
+var app_root  = path.join(__dirname, ".."),
+    lib_dir   = path.join(app_root, 'public/libs'),
+    node_dir  = path.join(app_root, 'node_modules'),
+    bower_dir = path.join(app_root, 'bower_components');
 
-// set TARGET=production on the environment to add asset fingerprints
-var production = process.env.TARGET === 'production';
+var production = process.env.RAILS_ENV === 'production';
 
 var config = {
-  entry: {
-    // Sources are expected to live in $app_root/webpack
-    'application': './webpack/application.js'
+  resolve: {
+    modules: [
+      "node_modules",
+    ],
   },
-
+  cache: true,
+  entry: {
+    required: [
+      "jquery",
+      "jquery-ui",
+      "jquery-ui/ui/effect",
+      "underscore",
+      "select2",
+      "bootstrap",
+      "angular",
+      "angular-resource",
+      "angular-cookies",
+      "angular-sanitize",
+      "angular-route",
+      "./webpack/required"
+    ],
+    app:  ['./webpack/app'],
+    application: ['./app/assets/javascripts/application'],
+    'feature-one': ['./webpack/feature-one'],
+    'feature-two': ['./webpack/feature-two'],
+  },
   output: {
     // Build assets directly in to public/webpack/, let webpack know
     // that all webpacked assets start with webpack/
-
     // must match config.webpack.output_dir
-    path: path.join(__dirname, '..', 'public', 'webpack'),
+    path: path.join(app_root, 'public', 'webpack'),
     publicPath: '/webpack/',
-
-    filename: production ? '[name]-[chunkhash].js' : '[name].js'
+		chunkFilename: "[id].chunk.js",
+    filename: production ? '[name]-[chunkhash].js' : '[name].bundle.js'
   },
-
-  resolve: {
-    root: path.join(__dirname, '..', 'webpack')
-  },
-
   plugins: [
-    // must match config.webpack.manifest_filename
+    new webpack.dependencies.LabeledModulesPlugin(),
+    new webpack.ProvidePlugin({
+      jQuery: "jquery",
+      $: "jquery",
+      _: "underscore"}),
     new StatsPlugin('manifest.json', {
-      // We only need assetsByChunkName
-      chunkModules: false,
+      assets: true,
+      chunkModules: true,
       source: false,
       chunks: false,
-      modules: false,
-      assets: true
-    })]
+      modules: true}),
+  ],
+  module: {
+    preLoaders: require("./webpack/preloaders.js"),
+    loaders: require("./webpack/loaders.js"),
+  },
+  resolve: {
+    alias: {
+      "templates": "./../app/assets/templates"
+    },
+    root: path.join(__dirname, '..', 'webpack'),
+    extensions: [
+      "",
+      ".coffee",
+      '.ts',
+      ".js",
+      ".haml"
+    ]
+  },
 };
 
-if (production) {
-  config.plugins.push(
-    new webpack.NoErrorsPlugin(),
-    new webpack.optimize.UglifyJsPlugin({
-      compressor: { warnings: false },
-      sourceMap: false
-    }),
-    new webpack.DefinePlugin({
-      'process.env': { NODE_ENV: JSON.stringify('production') }
-    }),
-    new webpack.optimize.DedupePlugin(),
-    new webpack.optimize.OccurenceOrderPlugin()
-  );
-} else {
-  config.devServer = {
-    port: devServerPort,
-    headers: { 'Access-Control-Allow-Origin': '*' }
-  };
-  config.output.publicPath = '//localhost:' + devServerPort + '/webpack/';
-  // Source maps
-  config.devtool = 'cheap-module-eval-source-map';
-}
-
-module.exports = config;
+environment = process.env.RAILS_ENV || 'development'
+console.log(`***** loading webpack ${environment} config *****`)
+module.exports = merge(config, require(`./webpack/${environment}`))

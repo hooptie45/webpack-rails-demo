@@ -1,0 +1,29 @@
+{
+  "name": "webpack-rails-example",
+  "description": "",
+  "main": "",
+  "authors": [
+    "shaun <shannah3@bloomberg.net>"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/mipearson/webpack-rails-demo",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^2",
+    "ui-router": "latest",
+    "bootstrap-sass-official": "~2",
+    "fontawesome": "~4",
+    "underscore": "^1.8.3",
+    "angular": "~1.0.8",
+    "angular-resource": "~1.0.8",
+    "angular-cookies": "~1.0.8",
+    "underscore": "^1.8.3"
+  }
+}

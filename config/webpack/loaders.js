@@ -1,4 +1,6 @@
-var _         = require("underscore");
+var _    = require("underscore"),
+    path = require("path");
+
 var JS_LOADER = function(extension, loader, config) {
   return _.extend({
     test: new RegExp("\\." + extension + "$"),
@@ -7,7 +9,31 @@ var JS_LOADER = function(extension, loader, config) {
   }, (config || {}));
 };
 
+var relativeAssetPath = '/app/assets/templates',
+    assetPath         = `templates`;
+
 module.exports = [
+  /*************************************************************************
+   * Angular Templates - With fast ruby support and Rails env
+   *
+   *   - inside directive you can use an aliased 'templates' path from
+   *     anywhere in the code IE it is not relative.
+   *
+   *   - These will be put in the template cache when page loads, saving
+   *     countless XHR requests! They also trigger page reloads in dev.
+   *
+   *     'templates/foo/one.html.haml' --> '.app/assets/templates/foo/one.html.haml'
+   *
+   *************************************************************************/
+  {
+    test: /\.html\.haml$/,
+    loaders: [
+      `ngtemplate?&prefix=${assetPath}&relativeTo=${relativeAssetPath}`,
+      "html?minimize",
+      'haml-transpiler-server-loader?-moduleExport',
+    ]
+  },
+
   /*************************************************************************
    * Config Files  (yaml, json)
    *************************************************************************/
@@ -47,13 +73,13 @@ module.exports = [
    *************************************************************************/
   { test: /\.woff$/,                             loader: "url-loader?limit=10000&mimetype=application/font-woff&name=[path][name].[ext]" },
   { test: /\.woff2$/,                            loader: "url-loader?limit=10000&mimetype=application/font-woff2&name=[path][name].[ext]"},
-  { test: /\.eot$/,                            loader: "url-loader?limit=10000&mimetype=application/font-eot&name=[path][name].[ext]"},
-  { test: /\.ttf$/,                            loader: "url-loader?limit=10000&mimetype=application/font-fft&name=[path][name].[ext]"},
-  { test: /\.(svg|gif|png)$/,            loader: "file-loader" },
+  { test: /\.eot$/,                              loader: "url-loader?limit=10000&mimetype=application/font-eot&name=[path][name].[ext]"},
+  { test: /\.ttf$/,                              loader: "url-loader?limit=10000&mimetype=application/font-fft&name=[path][name].[ext]"},
+  { test: /\.(svg|gif|png)$/,                    loader: "file-loader" },
   { test: /\.(jpe?g|png|gif|svg)$/i,             loader: 'file' },
 
   /*************************************************************************
-   * FONT AWESOME
+   * FONT AWESOME (WIP)
    *************************************************************************/
   { test: /\.woff2?(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: "url" },
   { test: /\.(ttf|eot|svg)(\?[\s\S]+)?$/,        loader: 'file' },

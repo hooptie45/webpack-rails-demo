@@ -1,21 +1,53 @@
-
 <!DOCTYPE html>
-<html>
-<head>
-  <title>RailsSprocketsWebpackDemo</title>
-  <%= stylesheet_link_tag    'application', media: 'all' %>
-  <%= javascript_include_tag 'application' %>
-  <%= javascript_include_tag *webpack_asset_paths('application') %>
-  <%= csrf_meta_tags %>
-</head>
-<body>
+<html ng-app="<%= angular_app %>">
+  <head>
+    <title>RailsSprocketsWebpackDemo</title>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 
-  <h1>Hello World</h1>
+    <%= javascript_include_tag *webpack_asset_paths('required') %>
+    <%= javascript_include_tag *webpack_asset_paths('application') %>
+    <%= javascript_include_tag *webpack_asset_paths(angular_app.underscore.dasherize) %>
+    <%= csrf_meta_tags %>
+  </head>
 
-  <p id="sprockets">Sprockets not loaded</p>
-  <p id="webpack">Webpack not loaded</p>
+  <body class="container-fluid">
+    <h1>Hello <%= angular_app %> <i class="fa fa-blind"></i></h1>
+    <div ng-view></div>
+    <div class="row-fluid">
+      <div class="span6">
+        <h3>Legacy Sprockets Assets</h3>
+        <% Pathname("./app/assets/javascripts/legacy/").children.each do |f| %>
+        <div id="<%= String(f.basename).split('.').first %>" class='alert alert-danger'>
+          <strong ng-click="toggleCode = !toggleCode"><%= f.to_s %></strong>
+          <span class="status pull-right">PENDING</span>
+          <pre ng-show="toggleCode"><%= f.read %></pre>
+        </div>
+        <% end %>
+      </div>
+      <div class="span6">
+        <h3>Tooling</h3>
+        <% Pathname("./app/assets/javascripts/integration/").children.each do |f| %>
+        <div id="<%= String(f.basename).split('.').last %>" class='alert alert-danger'>
+          <strong ng-click="toggleCode = !toggleCode"><%= f.to_s %></strong>
+          <span class="status pull-right">PENDING</span>
+          <pre ng-show="toggleCode"><%= f.read %></pre>
+        </div>
+        <% end %>
+      </div>
+    </div>
 
-</body>
+    <div class="row">
+      <div class="span6">
+        <h3>Angular App</h3>
+        <pre>{{data|json}}</pre>
+        <pre>{{testSelect}}</pre>
+        <select ng-model="testSelect" ng-options="value.text for value in data" simple-select2 placeholder="ss"  />
+        <script src="http://localhost:3808/webpack-dev-server.js"></script>
+      </div>
+      <div class="span6">
+        <h3>Angular App</h3>
+
+      </div>
+    </div>
+  </body>
 </html>
-
-
