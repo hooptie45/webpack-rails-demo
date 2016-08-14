@@ -23,7 +23,7 @@ module.exports.searchFeature = function(moduleName, name) {
   return _.chain(
     moduleFile
   ).concat(
-    _.chain(scaffold)..flatMap(expendDir).uniq().value()
+    _.chain(scaffold).flatMap(expendDir).uniq().value()
   ).map(asLocal)
     .tap(console.log)
     .value()
