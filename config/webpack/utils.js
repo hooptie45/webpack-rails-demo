@@ -25,6 +25,5 @@ module.exports.searchFeature = function(moduleName, name) {
   ).concat(
     _.chain(scaffold).flatMap(expendDir).uniq().value()
   ).map(asLocal)
-    .tap(console.log)
     .value()
 };
